@@ -53,6 +53,6 @@ jobs:
 
             cd "$REPO_DIR"
             git pull
-            docker compose pull helper-api
-            docker compose up -d --remove-orphans helper-api
+            docker compose -f docker-compose.prod.yml pull helper-api
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans helper-api
             docker image prune -f
