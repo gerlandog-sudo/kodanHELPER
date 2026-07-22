@@ -53,14 +53,12 @@ jobs:
 
             cd "$REPO_DIR"
             git pull
-            cat > .env << EOF
-SUPABASE_URL=${{ secrets.SUPABASE_URL }}
-SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
-SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }}
-OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
-GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-CORS_ORIGIN=https://helper.kodan.software
-EOF
+            echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" > .env
+            echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+            echo "SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }}" >> .env
+            echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
+            echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+            echo "CORS_ORIGIN=https://helper.kodan.software" >> .env
             docker compose -f docker-compose.prod.yml pull helper-api
             docker compose -f docker-compose.prod.yml up -d --remove-orphans helper-api
             docker image prune -f
