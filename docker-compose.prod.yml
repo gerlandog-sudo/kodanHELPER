@@ -1,0 +1,39 @@
+name: kodan-helper
+
+services:
+  helper-front:
+    image: ghcr.io/gerlandog-sudo/kodan-helper-front:latest
+    container_name: kodan_helper_front
+    restart: always
+    networks:
+      - kodan_net
+
+  helper-api:
+    image: ghcr.io/gerlandog-sudo/kodan-helper-api:latest
+    container_name: kodan_helper_api
+    restart: always
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - CORS_ORIGIN=https://helper.kodan.software
+    networks:
+      - kodan_net
+
+  helper-worker:
+    image: ghcr.io/gerlandog-sudo/kodan-helper-worker:latest
+    container_name: kodan_helper_worker
+    restart: always
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    networks:
+      - kodan_net
+
+networks:
+  kodan_net:
+    external: true
