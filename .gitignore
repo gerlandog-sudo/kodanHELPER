@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Capacitor
+mobile/ios/
+mobile/android/
+mobile/capacitor-cordova-android-plugins/
+mobile/plugins/
+
+# Docker
+*.docker-cache
+
+# Supabase
+supabase/.branches
+supabase/.temp
