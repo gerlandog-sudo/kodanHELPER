@@ -1,5 +1,5 @@
 <template>
-  <div class="glass-card hover:opacity-90 transition-all cursor-pointer">
+  <div class="glass-card hover-lift cursor-pointer">
     <div class="flex items-start justify-between mb-2">
       <span class="text-xs font-medium px-2 py-0.5 rounded"
         :style="{ backgroundColor: categoryColor + '20', color: categoryColor }">

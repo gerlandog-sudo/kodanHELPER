@@ -1,9 +1,9 @@
 <template>
-  <div class="p-8 max-w-2xl mx-auto">
+  <div class="p-8 max-w-2xl mx-auto stagger-enter">
     <h1 class="text-3xl font-bold mb-8" style="font-family: var(--font-headline); color: var(--on-background);">Configuracion</h1>
 
     <!-- Apariencia -->
-    <section class="glass p-6 mb-6">
+    <section class="glass p-6 mb-6 hover-lift">
       <h2 class="text-lg font-semibold mb-4" style="color: var(--on-surface);">Apariencia</h2>
 
       <div class="flex items-center justify-between">
@@ -40,7 +40,7 @@
     </section>
 
     <!-- Tipografia -->
-    <section class="glass p-6 mb-6">
+    <section class="glass p-6 mb-6 hover-lift">
       <h2 class="text-lg font-semibold mb-4" style="color: var(--on-surface);">Tipografia</h2>
       <p class="text-sm mb-1" style="font-family: var(--font-headline); color: var(--on-surface);">
         Headline: Sora — La inteligencia veloz
@@ -54,7 +54,7 @@
     </section>
 
     <!-- Cuenta -->
-    <section class="glass p-6">
+    <section class="glass p-6 hover-lift">
       <h2 class="text-lg font-semibold mb-4" style="color: var(--on-surface);">Cuenta</h2>
       <p class="text-sm mb-3" style="color: var(--on-surface-variant);">
         Sesion iniciada como <strong style="color: var(--on-surface);">{{ email || '...' }}</strong>

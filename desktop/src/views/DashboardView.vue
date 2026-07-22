@@ -9,7 +9,7 @@
     </div>
 
     <div v-if="store.loading" style="color: var(--on-surface-variant);">Cargando...</div>
-    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6 stagger-enter">
       <KanbanBoard :items="store.tasks" />
       <IdeaWall :items="store.ideas" />
       <MeetingCalendar :items="store.meetings" />

@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen flex items-center justify-center" style="background-color: var(--background);">
-    <div class="glass-elevated p-8 w-full max-w-md">
+    <div class="glass-elevated p-8 w-full max-w-md animate-in">
       <h1 class="text-2xl font-bold mb-2" style="font-family: var(--font-headline); color: var(--primary);">kodanHELPER</h1>
       <p class="mb-8 text-sm" style="color: var(--on-surface-variant);">Organizador Inteligente de Ideas, Tareas y Reuniones</p>
 
