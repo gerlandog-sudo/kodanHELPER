@@ -22,9 +22,42 @@
         <div class="relative flex justify-center text-xs"><span class="bg-slate-900 px-2 text-slate-500">o</span></div>
       </div>
 
+      <!-- Email / Password -->
+      <form @submit.prevent="loginPassword" class="space-y-3 mb-4">
+        <input
+          v-model="loginEmail"
+          type="email"
+          placeholder="tu@email.com"
+          class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          required
+        />
+        <input
+          v-model="loginPasswordField"
+          type="password"
+          placeholder="Contraseña"
+          class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          required
+        />
+        <div class="flex gap-2">
+          <button type="submit" :disabled="loading"
+            class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 disabled:opacity-50 transition-colors">
+            {{ loading ? 'Entrando...' : 'Iniciar sesión' }}
+          </button>
+          <button type="button" @click="signUp" :disabled="loading"
+            class="flex-1 px-4 py-2.5 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-600 disabled:opacity-50 transition-colors">
+            Registrarse
+          </button>
+        </div>
+      </form>
+
+      <div class="relative mb-4">
+        <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-slate-700"/></div>
+        <div class="relative flex justify-center text-xs"><span class="bg-slate-900 px-2 text-slate-500">o</span></div>
+      </div>
+
       <form @submit.prevent="loginMagicLink" class="space-y-3">
         <input
-          v-model="email"
+          v-model="magicEmail"
           type="email"
           placeholder="tu@email.com"
           class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
@@ -43,12 +76,46 @@
 
 <script setup>
 import { ref } from 'vue';
-import { signInWithGoogle, signInWithMagicLink } from '../services/auth.js';
+import { signInWithGoogle, signInWithMagicLink, signInWithPassword, signUpWithEmail } from '../services/auth.js';
+import { useRouter } from 'vue-router';
 
-const email = ref('');
+const router = useRouter();
+const loginEmail = ref('');
+const loginPasswordField = ref('');
+const magicEmail = ref('');
+const loading = ref(false);
 const sending = ref(false);
 const message = ref('');
 const messageClass = ref('text-green-400');
+
+async function loginPassword() {
+  loading.value = true;
+  message.value = '';
+  try {
+    await signInWithPassword(loginEmail.value, loginPasswordField.value);
+    router.push('/dashboard');
+  } catch (err) {
+    message.value = `Error: ${err.message}`;
+    messageClass.value = 'text-red-400';
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function signUp() {
+  loading.value = true;
+  message.value = '';
+  try {
+    await signUpWithEmail(loginEmail.value, loginPasswordField.value);
+    message.value = 'Cuenta creada! Revisa tu correo para confirmar.';
+    messageClass.value = 'text-green-400';
+  } catch (err) {
+    message.value = `Error: ${err.message}`;
+    messageClass.value = 'text-red-400';
+  } finally {
+    loading.value = false;
+  }
+}
 
 async function loginGoogle() {
   try {
@@ -63,7 +130,7 @@ async function loginMagicLink() {
   sending.value = true;
   message.value = '';
   try {
-    await signInWithMagicLink(email.value);
+    await signInWithMagicLink(magicEmail.value);
     message.value = 'Magic link enviado! Revisa tu correo.';
     messageClass.value = 'text-green-400';
   } catch (err) {

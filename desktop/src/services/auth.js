@@ -14,6 +14,25 @@ export async function signInWithGoogle() {
   return data;
 }
 
+export async function signUpWithEmail(email, password) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: window.location.origin },
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function signInWithPassword(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) throw error;
+  return data;
+}
+
 export async function signInWithMagicLink(email) {
   const { data, error } = await supabase.auth.signInWithOtp({
     email,
