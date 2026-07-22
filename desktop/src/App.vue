@@ -4,48 +4,46 @@
     <aside v-if="isLoggedIn" ref="sidebarRef" class="w-64 glass border-r border-outline-variant p-4 flex flex-col animate-in">
       <h1 class="text-xl font-bold mb-8" style="color: var(--primary); font-family: var(--font-headline);">kodanHELPER</h1>
 
-      <nav ref="navRef" class="relative flex-1">
-        <!-- Sliding indicator -->
+      <nav ref="navRef" class="relative flex-1 py-1">
+        <!-- Sliding indicator bar -->
         <div
           ref="indicatorRef"
-          class="absolute left-0 right-0 h-[40px] pointer-events-none"
+          class="absolute left-0 right-0 h-[40px] px-1 pointer-events-none"
           :style="{
             top: indicatorTop + 'px',
             opacity: indicatorTop >= 0 ? 1 : 0,
-            transition: 'top 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
+            transition: 'top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease',
           }"
         >
-          <div class="h-full w-full rounded-lg" style="background: linear-gradient(135deg, var(--primary), var(--primary-container)); box-shadow: 0 0 20px color-mix(in srgb, var(--primary) 25%, transparent);"></div>
+          <div class="h-full w-full rounded-lg" style="background: linear-gradient(135deg, var(--primary), var(--primary-container)); box-shadow: 0 0 24px color-mix(in srgb, var(--primary) 30%, transparent);"></div>
         </div>
 
-        <!-- Nav links -->
-        <div v-for="(item, idx) in navItems" :key="item.path" class="relative" style="z-index: 1;">
-          <router-link
-            :to="item.path"
-            :data-nav-index="idx"
-            class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200"
-            :class="$route.path === item.path
-              ? 'text-white font-medium'
-              : 'text-on-surface-variant hover:text-on-surface'"
-          >
-            <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center" :style="$route.path === item.path ? {} : {}">
-              <span :style="$route.path === item.path ? { color: 'var(--on-primary)' } : {}" v-html="item.icon"></span>
-            </span>
-            <span class="truncate">{{ item.label }}</span>
-          </router-link>
-        </div>
+        <!-- Nav links — direct children of nav para offsetTop correcto -->
+        <router-link
+          v-for="(item, idx) in navItems"
+          :key="item.path"
+          :to="item.path"
+          :data-nav-index="idx"
+          class="nav-link relative flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-200"
+          style="z-index: 1;"
+          :class="$route.path === item.path
+            ? 'text-white'
+            : 'text-on-surface-variant hover:text-on-surface'"
+        >
+          <span class="flex-shrink-0 w-5 h-5 flex items-center justify-center" v-html="item.icon"></span>
+          <span class="truncate">{{ item.label }}</span>
+        </router-link>
       </nav>
 
       <div class="pt-4 border-t border-outline-variant space-y-2">
         <router-link
           to="/settings"
-          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 text-on-surface-variant hover:text-on-surface"
-          active-class="nav-link-active"
+          class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors duration-200 text-on-surface-variant hover:text-on-surface"
         >
           <span v-html="settingsIcon"></span>
           Configuracion
         </router-link>
-        <button @click="handleLogout" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 text-on-surface-variant hover:text-on-surface text-left">
+        <button @click="handleLogout" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm transition-colors duration-200 text-on-surface-variant hover:text-on-surface text-left">
           <span v-html="logoutIcon"></span>
           Cerrar sesion
         </button>
@@ -73,7 +71,6 @@ const router = useRouter();
 const isLoggedIn = ref(false);
 const indicatorTop = ref(-100);
 const navRef = ref(null);
-const indicatorRef = ref(null);
 
 onMounted(() => {
   supabase.auth.getSession().then(({ data: { session } }) => {
@@ -102,7 +99,8 @@ function updateIndicator() {
       indicatorTop.value = -100;
       return;
     }
-    const linkEls = navEl.querySelectorAll('.nav-link');
+    // Ahora .nav-link son hijos DIRECTOS de navRef — offsetTop es correcto
+    const linkEls = navEl.querySelectorAll(':scope > .nav-link');
     const activeLink = linkEls[activeIdx];
     if (activeLink) {
       indicatorTop.value = activeLink.offsetTop;
@@ -110,10 +108,11 @@ function updateIndicator() {
   });
 }
 
-watch(() => route.path, updateIndicator);
+// Watch con flush:'post' para esperar al DOM actualizado
+watch(() => route.path, updateIndicator, { flush: 'post' });
 
 onMounted(() => {
-  setTimeout(updateIndicator, 100);
+  setTimeout(updateIndicator, 150);
 });
 
 async function handleLogout() {
