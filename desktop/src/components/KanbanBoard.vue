@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h2 class="text-lg font-semibold text-white mb-4">Tareas</h2>
+    <h2 class="text-lg font-semibold mb-4" style="color: var(--on-background);">Tareas</h2>
     <div class="space-y-3">
       <ItemCard v-for="item in items" :key="item.id" :item="item" />
-      <p v-if="!items.length" class="text-sm text-slate-500 italic">No hay tareas pendientes</p>
+      <p v-if="!items.length" class="text-sm italic" style="color: var(--on-surface-variant);">No hay tareas pendientes</p>
     </div>
   </div>
 </template>

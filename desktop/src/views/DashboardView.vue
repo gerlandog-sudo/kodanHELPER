@@ -1,14 +1,14 @@
 <template>
-  <div class="p-6">
+  <div class="p-8">
     <div class="flex items-center justify-between mb-8">
-      <h1 class="text-2xl font-bold text-white">Dashboard</h1>
-      <div class="flex gap-4 text-sm text-slate-400">
+      <h1 class="text-3xl font-bold" style="font-family: var(--font-headline); color: var(--on-background);">Dashboard</h1>
+      <div class="flex gap-4 text-sm" style="color: var(--on-surface-variant);">
         <span>Total: {{ store.totalCount }}</span>
         <span>Pendientes: {{ store.inboxCount }}</span>
       </div>
     </div>
 
-    <div v-if="store.loading" class="text-slate-400">Cargando...</div>
+    <div v-if="store.loading" style="color: var(--on-surface-variant);">Cargando...</div>
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <KanbanBoard :items="store.tasks" />
       <IdeaWall :items="store.ideas" />

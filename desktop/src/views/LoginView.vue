@@ -1,12 +1,13 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-950">
-    <div class="bg-slate-900 rounded-xl p-8 w-full max-w-md border border-slate-800">
-      <h1 class="text-2xl font-bold text-white mb-2">kodanHELPER</h1>
-      <p class="text-slate-400 mb-8 text-sm">Organizador Inteligente de Ideas, Tareas y Reuniones</p>
+  <div class="min-h-screen flex items-center justify-center" style="background-color: var(--background);">
+    <div class="glass-elevated p-8 w-full max-w-md">
+      <h1 class="text-2xl font-bold mb-2" style="font-family: var(--font-headline); color: var(--primary);">kodanHELPER</h1>
+      <p class="mb-8 text-sm" style="color: var(--on-surface-variant);">Organizador Inteligente de Ideas, Tareas y Reuniones</p>
 
       <button
         @click="loginGoogle"
-        class="w-full mb-4 px-4 py-3 bg-white text-slate-900 rounded-lg font-medium hover:bg-slate-100 transition-colors flex items-center justify-center gap-2"
+        class="w-full mb-4 px-4 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition-all"
+        style="background-color: var(--surface-bright); color: var(--on-surface); border: 1px solid var(--outline-variant);"
       >
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
@@ -18,8 +19,8 @@
       </button>
 
       <div class="relative mb-4">
-        <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-slate-700"/></div>
-        <div class="relative flex justify-center text-xs"><span class="bg-slate-900 px-2 text-slate-500">o</span></div>
+        <div class="absolute inset-0 flex items-center"><span class="w-full border-t" style="border-color: var(--outline-variant);"/></div>
+        <div class="relative flex justify-center text-xs"><span class="px-2" style="background-color: var(--surface-container-low); color: var(--on-surface-variant);">o</span></div>
       </div>
 
       <!-- Email / Password -->
@@ -28,31 +29,29 @@
           v-model="loginEmail"
           type="email"
           placeholder="tu@email.com"
-          class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          class="glass-input w-full"
           required
         />
         <input
           v-model="loginPasswordField"
           type="password"
           placeholder="Contraseña"
-          class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          class="glass-input w-full"
           required
         />
         <div class="flex gap-2">
-          <button type="submit" :disabled="loading"
-            class="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 disabled:opacity-50 transition-colors">
+          <button type="submit" :disabled="loading" class="btn-primary flex-1">
             {{ loading ? 'Entrando...' : 'Iniciar sesión' }}
           </button>
-          <button type="button" @click="signUp" :disabled="loading"
-            class="flex-1 px-4 py-2.5 bg-slate-700 text-white rounded-lg text-sm font-medium hover:bg-slate-600 disabled:opacity-50 transition-colors">
+          <button type="button" @click="signUp" :disabled="loading" class="btn-secondary flex-1">
             Registrarse
           </button>
         </div>
       </form>
 
       <div class="relative mb-4">
-        <div class="absolute inset-0 flex items-center"><span class="w-full border-t border-slate-700"/></div>
-        <div class="relative flex justify-center text-xs"><span class="bg-slate-900 px-2 text-slate-500">o</span></div>
+        <div class="absolute inset-0 flex items-center"><span class="w-full border-t" style="border-color: var(--outline-variant);"/></div>
+        <div class="relative flex justify-center text-xs"><span class="px-2" style="background-color: var(--surface-container-low); color: var(--on-surface-variant);">o</span></div>
       </div>
 
       <form @submit.prevent="loginMagicLink" class="space-y-3">
@@ -60,16 +59,15 @@
           v-model="magicEmail"
           type="email"
           placeholder="tu@email.com"
-          class="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+          class="glass-input w-full"
           required
         />
-        <button type="submit" :disabled="sending"
-          class="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-500 disabled:opacity-50 transition-colors">
+        <button type="submit" :disabled="sending" class="btn-primary w-full">
           {{ sending ? 'Enviando...' : 'Enviar Magic Link' }}
         </button>
       </form>
 
-      <p v-if="message" class="mt-4 text-sm text-center" :class="messageClass">{{ message }}</p>
+      <p v-if="message" class="mt-4 text-sm text-center" :style="{ color: messageClass }">{{ message }}</p>
     </div>
   </div>
 </template>
@@ -86,7 +84,7 @@ const magicEmail = ref('');
 const loading = ref(false);
 const sending = ref(false);
 const message = ref('');
-const messageClass = ref('text-green-400');
+const messageClass = ref('var(--primary)');
 
 async function loginPassword() {
   loading.value = true;
@@ -96,7 +94,7 @@ async function loginPassword() {
     router.push('/dashboard');
   } catch (err) {
     message.value = `Error: ${err.message}`;
-    messageClass.value = 'text-red-400';
+    messageClass.value = 'var(--error)';
   } finally {
     loading.value = false;
   }
@@ -108,10 +106,10 @@ async function signUp() {
   try {
     await signUpWithEmail(loginEmail.value, loginPasswordField.value);
     message.value = 'Cuenta creada! Revisa tu correo para confirmar.';
-    messageClass.value = 'text-green-400';
+    messageClass.value = 'var(--primary)';
   } catch (err) {
     message.value = `Error: ${err.message}`;
-    messageClass.value = 'text-red-400';
+    messageClass.value = 'var(--error)';
   } finally {
     loading.value = false;
   }
@@ -122,7 +120,7 @@ async function loginGoogle() {
     await signInWithGoogle();
   } catch (err) {
     message.value = `Error: ${err.message}`;
-    messageClass.value = 'text-red-400';
+    messageClass.value = 'var(--error)';
   }
 }
 
@@ -132,10 +130,10 @@ async function loginMagicLink() {
   try {
     await signInWithMagicLink(magicEmail.value);
     message.value = 'Magic link enviado! Revisa tu correo.';
-    messageClass.value = 'text-green-400';
+    messageClass.value = 'var(--primary)';
   } catch (err) {
     message.value = `Error: ${err.message}`;
-    messageClass.value = 'text-red-400';
+    messageClass.value = 'var(--error)';
   } finally {
     sending.value = false;
   }
