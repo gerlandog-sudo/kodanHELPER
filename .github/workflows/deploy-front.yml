@@ -46,13 +46,21 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             REPO_DIR="/opt/kodanapps/kodan-helper"
-            if [ ! -d "$REPO_DIR" ]; then
-              mkdir -p /opt/kodanapps
-              git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/gerlandog-sudo/kodan-helper.git "$REPO_DIR"
+            if [ ! -d "$REPO_DIR/.git" ]; then
+              rm -rf "$REPO_DIR"
+              git clone --depth 1 https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/gerlandog-sudo/kodanHELPER.git "$REPO_DIR"
             fi
 
             cd "$REPO_DIR"
             git pull
+            cat > .env << EOF
+SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }}
+OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+CORS_ORIGIN=https://helper.kodan.software
+EOF
             docker compose -f docker-compose.prod.yml pull helper-front
             docker compose -f docker-compose.prod.yml up -d --remove-orphans helper-front
             docker image prune -f
