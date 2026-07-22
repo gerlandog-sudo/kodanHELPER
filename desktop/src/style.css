@@ -56,12 +56,12 @@
   --font-body: Inter, system-ui, -apple-system, sans-serif;
   --font-mono: Geist, 'JetBrains Mono', monospace;
 
-  /* Border radius */
+  /* Border radius — sutileza Luminous */
   --radius-sm: 0.25rem;
-  --radius-default: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  --radius-default: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
   --radius-full: 9999px;
 }
 
