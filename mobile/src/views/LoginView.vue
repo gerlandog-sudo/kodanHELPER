@@ -1,14 +1,44 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-950 p-6">
-    <div class="w-full max-w-sm">
-      <h1 class="text-2xl font-bold text-white mb-2 text-center">kodanHELPER</h1>
-      <p class="text-slate-400 mb-8 text-sm text-center">Inicia sesion para empezar</p>
+  <div class="min-h-screen flex flex-col items-center justify-center px-6" :style="{ backgroundColor: 'var(--background)' }">
+    <div class="w-full max-w-sm animate-in">
+      <h1 class="text-3xl font-bold mb-1 text-center" style="font-family: var(--font-headline); color: var(--primary);">kodanHELPER</h1>
+      <p class="mb-10 text-sm text-center" style="color: var(--on-surface-variant);">Organizador Inteligente</p>
 
-      <button
-        @click="loginGoogle"
-        :disabled="loading"
-        class="w-full px-4 py-3 bg-white text-slate-900 rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
-      >
+      <!-- Email -->
+      <form @submit.prevent="loginPassword" class="space-y-3 mb-4">
+        <input
+          v-model="loginEmail"
+          type="email"
+          placeholder="tu@email.com"
+          class="glass-input w-full"
+          required
+        />
+        <input
+          v-model="loginPasswordField"
+          type="password"
+          placeholder="Contraseña"
+          class="glass-input w-full"
+          required
+        />
+        <div class="flex gap-2">
+          <button type="submit" :disabled="loading" class="btn-primary flex-1 text-center">
+            {{ loading ? 'Entrando...' : 'Entrar' }}
+          </button>
+          <button type="button" @click="signUp" :disabled="loading" class="btn-secondary flex-1 text-center">
+            Crear cuenta
+          </button>
+        </div>
+      </form>
+
+      <!-- Divider -->
+      <div class="relative mb-4">
+        <div class="absolute inset-0 flex items-center"><span class="w-full border-t" style="border-color: var(--outline-variant);"/></div>
+        <div class="relative flex justify-center text-xs"><span class="px-3" style="background-color: var(--background); color: var(--on-surface-variant);">o</span></div>
+      </div>
+
+      <!-- Google -->
+      <button @click="loginGoogle" :disabled="loading" class="w-full mb-4 px-4 py-3.5 rounded-lg font-medium flex items-center justify-center gap-3 transition-all"
+        style="background-color: var(--surface-bright); color: var(--on-surface); border: 1px solid var(--outline-variant);">
         <svg class="w-5 h-5" viewBox="0 0 24 24">
           <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
           <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -18,28 +48,61 @@
         Continuar con Google
       </button>
 
-      <p v-if="message" class="mt-4 text-sm text-center" :class="messageClass">{{ message }}</p>
+      <!-- Error/Success message -->
+      <transition name="toast">
+        <p v-if="message" class="mt-4 text-sm text-center" :style="{ color: messageColor }">{{ message }}</p>
+      </transition>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { signInWithGoogle } from '../services/auth.js';
+import { signInWithGoogle, signInWithPassword, signUpWithEmail } from '../services/auth.js';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
+const loginEmail = ref('');
+const loginPasswordField = ref('');
 const loading = ref(false);
 const message = ref('');
-const messageClass = ref('');
+const messageColor = ref('var(--primary)');
+
+async function loginPassword() {
+  loading.value = true;
+  message.value = '';
+  try {
+    await signInWithPassword(loginEmail.value, loginPasswordField.value);
+    router.push('/home');
+  } catch (err) {
+    message.value = `Error: ${err.message}`;
+    messageColor.value = 'var(--error)';
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function signUp() {
+  loading.value = true;
+  message.value = '';
+  try {
+    await signUpWithEmail(loginEmail.value, loginPasswordField.value);
+    message.value = 'Cuenta creada! Revisa tu correo.';
+    messageColor.value = 'var(--primary)';
+  } catch (err) {
+    message.value = `Error: ${err.message}`;
+    messageColor.value = 'var(--error)';
+  } finally {
+    loading.value = false;
+  }
+}
 
 async function loginGoogle() {
-  loading.value = true;
   try {
     await signInWithGoogle();
   } catch (err) {
     message.value = `Error: ${err.message}`;
-    messageClass.value = 'text-red-400';
-  } finally {
-    loading.value = false;
+    messageColor.value = 'var(--error)';
   }
 }
 </script>

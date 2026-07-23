@@ -19,6 +19,14 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - CORS_ORIGIN=https://helper.kodan.software
+      - CORS_ORIGIN_MOBILE=https://mhelper.kodan.software
+    networks:
+      - kodan_net
+
+  helper-mobile:
+    image: ghcr.io/gerlandog-sudo/kodan-helper-mobile:latest
+    container_name: kodan_helper_mobile
+    restart: always
     networks:
       - kodan_net
 

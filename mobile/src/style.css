@@ -1,7 +1,497 @@
+@import "tailwindcss";
+
+/* ─── Theme Tokens (Luminous Intelligence) ─── */
+@theme {
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  --color-surface-tint: var(--surface-tint);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
+  --color-inverse-primary: var(--inverse-primary);
+  --color-secondary: var(--secondary);
+  --color-on-secondary: var(--on-secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-tertiary: var(--tertiary);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+  --color-background: var(--background);
+  --color-on-background: var(--on-background);
+  --color-surface-variant: var(--surface-variant);
+
+  --font-headline: Sora, system-ui, sans-serif;
+  --font-body: Inter, system-ui, -apple-system, sans-serif;
+  --font-mono: Geist, 'JetBrains Mono', monospace;
+
+  --radius-sm: 0.25rem;
+  --radius-default: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
+/* ─── Light Theme ─── */
+.light, :root {
+  --surface: #faf8ff;
+  --surface-dim: #d2d9f4;
+  --surface-bright: #faf8ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f3ff;
+  --surface-container: #eaedff;
+  --surface-container-high: #e2e7ff;
+  --surface-container-highest: #dae2fd;
+  --on-surface: #131b2e;
+  --on-surface-variant: #494454;
+  --inverse-surface: #283044;
+  --inverse-on-surface: #eef0ff;
+  --outline: #7b7486;
+  --outline-variant: #cbc3d7;
+  --surface-tint: #6d3bd7;
+  --primary: #6b38d4;
+  --on-primary: #ffffff;
+  --primary-container: #8455ef;
+  --on-primary-container: #fffbff;
+  --inverse-primary: #d0bcff;
+  --secondary: #6f5092;
+  --on-secondary: #ffffff;
+  --secondary-container: #d9b5ff;
+  --on-secondary-container: #614283;
+  --tertiary: #59568a;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #726fa4;
+  --on-tertiary-container: #fffbff;
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+  --background: #faf8ff;
+  --on-background: #131b2e;
+  --surface-variant: #dae2fd;
+}
+
+/* ─── Dark Theme ─── */
+.dark {
+  --surface: #0b1326;
+  --surface-dim: #0b1326;
+  --surface-bright: #31394d;
+  --surface-container-lowest: #060e20;
+  --surface-container-low: #131b2e;
+  --surface-container: #171f33;
+  --surface-container-high: #222a3d;
+  --surface-container-highest: #2d3449;
+  --on-surface: #dae2fd;
+  --on-surface-variant: #cbc3d7;
+  --inverse-surface: #dae2fd;
+  --inverse-on-surface: #283044;
+  --outline: #958ea0;
+  --outline-variant: #494454;
+  --surface-tint: #d0bcff;
+  --primary: #d0bcff;
+  --on-primary: #3c0091;
+  --primary-container: #a078ff;
+  --on-primary-container: #340080;
+  --inverse-primary: #6d3bd7;
+  --secondary: #dbb8ff;
+  --on-secondary: #3f2160;
+  --secondary-container: #573878;
+  --on-secondary-container: #caa6ef;
+  --tertiary: #c4c1fb;
+  --on-tertiary: #2d2a5b;
+  --tertiary-container: #8e8bc2;
+  --on-tertiary-container: #262354;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+  --on-error-container: #ffdad6;
+  --background: #0b1326;
+  --on-background: #dae2fd;
+  --surface-variant: #2d3449;
+}
+
+/* ─── Safe Area Insets (iOS notches + Android) ─── */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* ─── Base ─── */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  background-color: var(--background);
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-body);
+  background-color: var(--background);
+  color: var(--on-background);
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
-  background-color: #020617;
-  color: #e2e8f0;
+}
+
+/* ─── Bottom Navigation ─── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(64px + var(--sab));
+  padding-bottom: var(--sab);
+  background-color: color-mix(in srgb, var(--surface-container) 85%, transparent);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-top: 1px solid var(--outline-variant);
+  display: flex;
+  align-items: stretch;
+  z-index: 100;
+}
+
+.bottom-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+
+.bottom-nav-item.active {
+  color: var(--primary);
+}
+
+.bottom-nav-item .nav-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+
+.bottom-nav-item.active .nav-icon {
+  transform: scale(1.1);
+}
+
+.bottom-nav-item .nav-label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+/* Capture button (center, elevated) */
+.capture-btn {
+  position: relative;
+  top: -12px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-container));
+  border: 3px solid var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 20px color-mix(in srgb, var(--primary) 25%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.capture-btn:active {
+  transform: scale(0.92);
+}
+
+/* ─── Glass utilities ─── */
+@utility glass {
+  background-color: var(--surface-container-low);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+@utility glass-elevated {
+  background-color: var(--surface-container);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(40px);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--primary) 15%, transparent);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+@utility glass-card {
+  background-color: color-mix(in srgb, var(--surface-container-low) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 10%, transparent);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(20px);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ─── Glass Input ─── */
+@utility glass-input {
+  background-color: var(--surface-container-high);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-md);
+  color: var(--on-surface);
+  font-family: var(--font-body);
+  padding: 0.75rem 1rem;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+  &:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 15%, transparent);
+    outline: none;
+  }
+  &::placeholder {
+    color: var(--on-surface-variant);
+  }
+}
+
+/* ─── Buttons ─── */
+@utility btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-container));
+  color: var(--on-primary);
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.875rem 1.25rem;
+  transition: all 0.2s ease;
+  border: none;
+  -webkit-appearance: none;
+  &:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+@utility btn-secondary {
+  background-color: var(--surface-container-high);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-lg);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  padding: 0.875rem 1.25rem;
+  transition: all 0.2s ease;
+  -webkit-appearance: none;
+  &:active {
+    background-color: var(--surface-container-highest);
+    transform: scale(0.97);
+  }
+}
+
+/* ─── Typography helpers ─── */
+@utility text-headline {
+  font-family: var(--font-headline);
+  color: var(--on-background);
+}
+
+@utility text-body {
+  font-family: var(--font-body);
+  color: var(--on-surface);
+}
+
+@utility text-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+/* ─── Micro-animations ─── */
+
+/* Page transition */
+.page-enter-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.page-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* Entrance animation */
+@utility animate-in {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Staggered entrance */
+@utility stagger-enter {
+  & > * {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: fadeInUp 0.35s ease-out forwards;
+  }
+  & > *:nth-child(1) { animation-delay: 0ms; }
+  & > *:nth-child(2) { animation-delay: 60ms; }
+  & > *:nth-child(3) { animation-delay: 120ms; }
+  & > *:nth-child(4) { animation-delay: 180ms; }
+  & > *:nth-child(5) { animation-delay: 240ms; }
+  & > *:nth-child(6) { animation-delay: 300ms; }
+  & > *:nth-child(7) { animation-delay: 360ms; }
+  & > *:nth-child(8) { animation-delay: 420ms; }
+}
+
+/* Hover lift */
+@utility hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Shimmer skeleton */
+@utility shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--surface-container-high) 25%,
+    var(--surface-container-highest) 50%,
+    var(--surface-container-high) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Toast animation */
+.toast-enter-active { transition: opacity 0.3s, transform 0.3s; }
+.toast-leave-active { transition: opacity 0.3s, transform 0.3s; }
+.toast-enter-from { opacity: 0; transform: translateY(20px); }
+.toast-leave-to { opacity: 0; transform: translateY(20px); }
+
+/* ─── Safe area padding for main content ─── */
+.main-content {
+  padding-bottom: calc(80px + var(--sab));
+  padding-top: var(--sat);
+  min-height: 100vh;
+}
+
+/* ─── Pull to refresh indicator ─── */
+.pull-indicator {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--on-surface-variant);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+}
+
+/* ─── Recorder pulse ─── */
+@keyframes recorderPulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--error) 40%, transparent); }
+  50% { box-shadow: 0 0 0 20px color-mix(in srgb, var(--error) 0%, transparent); }
+}
+
+.recorder-active {
+  animation: recorderPulse 2s ease-in-out infinite;
+}
+
+/* ─── Category badges ─── */
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1875rem 0.5rem;
+  border-radius: var(--radius-default);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ─── Tab bar inside CaptureView ─── */
+.sub-tab-bar {
+  display: flex;
+  background-color: var(--surface-container);
+  border-radius: var(--radius-full);
+  padding: 3px;
+  gap: 2px;
+}
+
+.sub-tab {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--on-surface-variant);
+  transition: all 0.2s ease;
+  border: none;
+  background: transparent;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.sub-tab.active {
+  background-color: var(--primary);
+  color: var(--on-primary);
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 3px;
+}
+
+/* ─── Selection ─── */
+::selection {
+  background: color-mix(in srgb, var(--primary) 30%, transparent);
+  color: var(--on-surface);
 }

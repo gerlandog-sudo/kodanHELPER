@@ -3,14 +3,46 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  },
+});
 
 export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: {
-      redirectTo: 'software.kodan.helper://auth/callback',
-    },
+    options: { redirectTo: window.location.origin + '/auth/callback' },
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function signUpWithEmail(email, password) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: window.location.origin },
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function signInWithPassword(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function signInWithMagicLink(email) {
+  const { data, error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { emailRedirectTo: window.location.origin },
   });
   if (error) throw error;
   return data;
@@ -31,4 +63,10 @@ export async function getCurrentSession() {
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   return data.session;
+}
+
+export async function getSupabaseToken() {
+  const { data, error } = await supabase.auth.getSession();
+  if (error || !data.session) return null;
+  return data.session.access_token;
 }
