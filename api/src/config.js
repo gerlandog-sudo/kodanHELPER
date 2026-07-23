@@ -14,6 +14,8 @@ export const config = {
     apiKey: process.env.GEMINI_API_KEY,
   },
   cors: {
-    origin: process.env.CORS_ORIGIN || 'https://helper.kodan.software',
+    origin: process.env.CORS_ORIGIN
+      ? process.env.CORS_ORIGIN.split(',')
+      : ['https://helper.kodan.software', 'https://mhelper.kodan.software'],
   },
 };
