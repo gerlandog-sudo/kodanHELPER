@@ -6,7 +6,7 @@ const logger = pino({ transport: { target: 'pino-pretty' } });
 export async function transcribeAudio(audioUrl, geminiApiKey) {
   const genAI = new GoogleGenerativeAI(geminiApiKey);
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash-latest',
+    model: 'gemini-2.0-flash',
     generationConfig: {
       temperature: 0.1,
     },
