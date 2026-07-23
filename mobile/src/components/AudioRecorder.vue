@@ -3,7 +3,7 @@
     <!-- Record button -->
     <button
       @click="toggleRecording"
-      :disabled="granting"
+      :disabled="!supported"
       class="w-24 h-24 rounded-full flex items-center justify-center transition-all"
       :class="isRecording ? 'recorder-active' : ''"
       :style="{
@@ -24,24 +24,24 @@
     </button>
 
     <p class="text-sm" style="color: var(--on-surface-variant);">
-      {{ isRecording ? 'Toca para detener' : granting ? 'Solicitando micrófono...' : 'Toca para grabar' }}
+      {{ statusText }}
     </p>
 
-    <!-- Duration -->
-    <p v-if="isRecording || duration > 0" class="text-4xl font-bold tabular-nums" style="font-family: var(--font-mono); color: var(--on-surface); letter-spacing: 0.05em;">
-      {{ formatDuration(duration) }}
-    </p>
-
-    <!-- Waveform animation when recording -->
-    <div v-if="isRecording" class="flex items-center gap-0.5 h-8">
-      <div v-for="n in 32" :key="n" class="w-1 rounded-full transition-all"
-        :style="{
-          height: Math.random() * 32 + 4 + 'px',
-          backgroundColor: 'var(--primary)',
-          opacity: 0.4 + Math.random() * 0.6,
-        }">
-      </div>
+    <!-- Transcribed text (live while recording, final when done) -->
+    <div v-if="transcript" class="w-full glass p-4 rounded-lg text-sm leading-relaxed"
+      style="color: var(--on-surface); min-height: 60px; border: 1px solid var(--outline-variant);">
+      {{ transcript }}
+      <span v-if="isRecording" class="inline-block w-1.5 h-4 ml-0.5 align-text-bottom"
+        style="background-color: var(--primary); animation: blink 1s step-end infinite;"></span>
     </div>
+
+    <!-- Send button (only when done transcribing and there's text) -->
+    <button v-if="!isRecording && transcript && !sending"
+      @click="sendTranscript"
+      class="btn-primary"
+      style="padding: 0.75rem 2rem;">
+      Enviar como nota
+    </button>
 
     <!-- Status message -->
     <transition name="toast">
@@ -51,26 +51,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 
 const emit = defineEmits(['recording-complete']);
 
 const isRecording = ref(false);
-const granting = ref(false);
-const duration = ref(0);
+const transcript = ref('');
 const status = ref('');
 const statusColor = ref('');
+const sending = ref(false);
 
-let mediaRecorder = null;
-let audioChunks = [];
-let durationInterval = null;
-let waveformInterval = null;
+let recognition = null;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const supported = !!SpeechRecognition;
 
-function formatDuration(seconds) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+function getStatusText() {
+  if (!supported) return 'Dictado no disponible en este navegador';
+  if (sending.value) return 'Enviando...';
+  if (isRecording.value) return 'Grabando — toca para detener';
+  if (transcript.value) return 'Revisa el texto y envíalo';
+  return 'Toca para dictar';
 }
+
+const statusText = computed(getStatusText);
 
 async function toggleRecording() {
   if (isRecording.value) {
@@ -81,57 +84,90 @@ async function toggleRecording() {
 }
 
 async function startRecording() {
+  if (!SpeechRecognition) {
+    status.value = 'Dictado no soportado en este navegador';
+    statusColor.value = 'var(--error)';
+    return;
+  }
+
   try {
-    granting.value = true;
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    granting.value = false;
+    // Request mic permission
+    await navigator.mediaDevices.getUserMedia({ audio: true });
 
-    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-      ? 'audio/webm;codecs=opus'
-      : 'audio/webm';
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType });
-    audioChunks = [];
+    recognition.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const text = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          final += text;
+        } else {
+          interim += text;
+        }
+      }
+      transcript.value = final + interim;
+    };
 
-    mediaRecorder.ondataavailable = (event) => {
-      if (event.data.size > 0) {
-        audioChunks.push(event.data);
+    recognition.onerror = (event) => {
+      console.error('SpeechRecognition error:', event.error);
+      if (event.error === 'not-allowed') {
+        status.value = 'Permiso denegado. Habilita el micrófono.';
+      } else if (event.error === 'no-speech') {
+        status.value = 'No se detectó voz. Intenta de nuevo.';
+      } else {
+        status.value = `Error: ${event.error}`;
+      }
+      statusColor.value = 'var(--error)';
+      isRecording.value = false;
+    };
+
+    recognition.onend = () => {
+      if (isRecording.value) {
+        // Restart if it ended unexpectedly (timeout, etc)
+        try { recognition.start(); } catch {}
       }
     };
 
-    mediaRecorder.onstop = () => {
-      const audioBlob = new Blob(audioChunks, { type: mimeType });
-      stream.getTracks().forEach(track => track.stop());
-      clearInterval(durationInterval);
-      clearInterval(waveformInterval);
-      emit('recording-complete', audioBlob);
-    };
-
-    mediaRecorder.start();
+    recognition.start();
     isRecording.value = true;
+    transcript.value = '';
     status.value = '';
-    duration.value = 0;
-
-    durationInterval = setInterval(() => { duration.value++; }, 1000);
-
-    // Force reactive update for waveform
-    waveformInterval = setInterval(() => {
-      // Trigger re-render by updating a dummy ref if needed
-    }, 200);
-
   } catch (err) {
-    granting.value = false;
     status.value = err.name === 'NotAllowedError'
-      ? 'Permiso denegado. Habilita el microfono en Ajustes.'
+      ? 'Permiso denegado. Habilita el micrófono en Ajustes.'
       : `Error: ${err.message}`;
     statusColor.value = 'var(--error)';
   }
 }
 
 function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
+  if (recognition) {
+    recognition.continuous = false;
+    recognition.stop();
     isRecording.value = false;
   }
 }
+
+function sendTranscript() {
+  if (!transcript.value.trim() || sending.value) return;
+  sending.value = true;
+  emit('recording-complete', transcript.value.trim());
+}
+
+onUnmounted(() => {
+  if (recognition) {
+    try { recognition.stop(); } catch {}
+  }
+});
+</script>
+
+<script>
+// computed is imported separately for the <script setup> above
+import { computed } from 'vue';
 </script>

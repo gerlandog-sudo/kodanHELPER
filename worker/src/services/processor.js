@@ -1,13 +1,15 @@
 import pino from 'pino';
-import { transcribeAudio } from './whisper.js';
-import { classifyText } from './gemini.js';
+import { transcribeAudio, classifyText } from './groq.js';
 
 const logger = pino({ transport: { target: 'pino-pretty' } });
 
 export async function processRawInput(supabase, record) {
   const { id, type, content_url, content_text, user_id } = record;
-  const openaiApiKey = process.env.OPENAI_API_KEY;
-  const nvidiaApiKey = process.env.GEMINI_API_KEY; // Reused env var — ahora contiene NVIDIA key
+  const groqApiKey = process.env.GROQ_API_KEY;
+
+  if (!groqApiKey) {
+    throw new Error('GROQ_API_KEY environment variable is not set');
+  }
 
   // Step 1: Get plain text
   let text;
@@ -26,7 +28,7 @@ export async function processRawInput(supabase, record) {
       throw new Error(`Failed to create signed URL: ${signedUrlError.message}`);
     }
 
-    text = await transcribeAudio(signedUrl, openaiApiKey);
+    text = await transcribeAudio(signedUrl, groqApiKey);
   } else {
     if (!content_text) {
       throw new Error('Text record has no content_text');
@@ -34,8 +36,8 @@ export async function processRawInput(supabase, record) {
     text = content_text;
   }
 
-  // Step 2: Classify with NVIDIA LLM
-  const classification = await classifyText(text, nvidiaApiKey);
+  // Step 2: Classify with Groq LLM
+  const classification = await classifyText(text, groqApiKey);
 
   // Step 3: Insert into items table
   const { error: insertError } = await supabase
