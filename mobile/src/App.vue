@@ -46,6 +46,9 @@ const isLoggedIn = ref(false);
 useThemeStore();
 
 onMounted(async () => {
+  // Reveal body content after Vue mounts (prevent FOUC)
+  document.body.classList.add('ready');
+
   const { data: { session } } = await supabase.auth.getSession();
   isLoggedIn.value = !!session;
 
