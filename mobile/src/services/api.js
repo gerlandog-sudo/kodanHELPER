@@ -51,7 +51,7 @@ export async function ingestText(text, token) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ text, source: 'mobile' }),
+    body: JSON.stringify({ type: 'text', content: text }),
   });
 
   if (!res.ok) {
@@ -63,25 +63,44 @@ export async function ingestText(text, token) {
 }
 
 /**
- * Ingest audio via the helper API (transcription + AI processing)
+ * Ingest audio: upload to Supabase Storage + insert raw_input for processing
  */
-export async function ingestAudio(audioBlob, token) {
-  const formData = new FormData();
-  formData.append('audio', audioBlob, 'recording.webm');
-  formData.append('source', 'mobile');
+export async function ingestAudio(audioBlob) {
+  // 0. Get authenticated user first (need ID for storage path + insert)
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
+  if (!user) throw new Error('No autenticado');
 
-  const res = await fetch(`${import.meta.env.VITE_API_URL || 'https://helper-api.kodan.software'}/api/ingest/audio`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
-  });
+  // 1. Upload to Supabase Storage
+  // RLS on audio-uploads requires path: {userId}/{filename}
+  const ext = audioBlob.type?.includes('webm') ? 'webm' : 'webm';
+  const fileName = `${user.id}/audio-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { data: uploadData, error: uploadError } = await supabase.storage
+    .from('audio-uploads')
+    .upload(fileName, audioBlob, {
+      contentType: audioBlob.type || 'audio/webm',
+      upsert: false,
+    });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || `HTTP ${res.status}`);
+  if (uploadError) {
+    throw new Error(`Error al subir audio: ${uploadError.message}`);
   }
 
-  return res.json();
+  // 2. Insert into raw_inputs (worker picks it up for transcription + AI)
+  const { data, error: insertError } = await supabase
+    .from('raw_inputs')
+    .insert({
+      user_id: user.id,
+      type: 'audio',
+      content_url: uploadData.path,
+      status: 'pending',
+    })
+    .select()
+    .single();
+
+  if (insertError) {
+    throw new Error(`Error al guardar: ${insertError.message}`);
+  }
+
+  return data;
 }
