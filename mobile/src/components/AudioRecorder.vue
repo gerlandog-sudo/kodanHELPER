@@ -40,7 +40,7 @@
       @click="sendTranscript"
       class="btn-primary"
       style="padding: 0.75rem 2rem;">
-      Enviar como nota
+      Crear elemento
     </button>
 
     <!-- Status message -->
