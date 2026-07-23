@@ -36,6 +36,7 @@ import AudioRecorder from '../components/AudioRecorder.vue';
 import QuickTextInput from '../components/QuickTextInput.vue';
 import PhotoCapture from '../components/PhotoCapture.vue';
 import { ingestAudio } from '../services/api.js';
+import { supabase } from '../services/auth.js';
 
 const activeTab = ref('audio');
 
@@ -47,6 +48,8 @@ const tabs = [
 
 const toast = reactive({ visible: false, message: '', type: 'success' });
 
+let pollTimer = null;
+
 function showToast(msg, type = 'success') {
   toast.message = msg;
   toast.type = type;
@@ -54,11 +57,53 @@ function showToast(msg, type = 'success') {
   setTimeout(() => { toast.visible = false; }, 3000);
 }
 
+async function pollStatus(rawInputId) {
+  let attempts = 0;
+  const maxAttempts = 12; // 60 seconds max
+
+  const poll = async () => {
+    if (attempts >= maxAttempts) {
+      showToast('El procesamiento está tomando más de lo esperado. Revisa tu lista más tarde.', 'success');
+      return;
+    }
+    attempts++;
+
+    const { data, error } = await supabase
+      .from('raw_inputs')
+      .select('status, error_message')
+      .eq('id', rawInputId)
+      .single();
+
+    if (error || !data) {
+      // Can't poll, just stop
+      return;
+    }
+
+    if (data.status === 'processed') {
+      showToast('Audio procesado correctamente', 'success');
+      return;
+    }
+
+    if (data.status === 'failed') {
+      const reason = data.error_message || 'error desconocido';
+      showToast(`No se pudo procesar: ${reason}`, 'error');
+      return;
+    }
+
+    // Still pending/processing — poll again in 5s
+    pollTimer = setTimeout(poll, 5000);
+  };
+
+  pollTimer = setTimeout(poll, 5000);
+}
+
 async function handleAudio(audioBlob) {
   showToast('Subiendo audio...', 'success');
   try {
-    await ingestAudio(audioBlob);
+    const rawInput = await ingestAudio(audioBlob);
     showToast(`Audio capturado (${(audioBlob.size / 1024).toFixed(0)} KB)`, 'success');
+    // Poll for processing status
+    pollStatus(rawInput.id);
   } catch (err) {
     showToast(`Error: ${err.message}`, 'error');
   }
