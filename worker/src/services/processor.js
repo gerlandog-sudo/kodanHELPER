@@ -6,7 +6,8 @@ const logger = pino({ transport: { target: 'pino-pretty' } });
 
 export async function processRawInput(supabase, record) {
   const { id, type, content_url, content_text, user_id } = record;
-  const geminiApiKey = process.env.GEMINI_API_KEY;
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+  const nvidiaApiKey = process.env.GEMINI_API_KEY; // Reused env var — ahora contiene NVIDIA key
 
   // Step 1: Get plain text
   let text;
@@ -25,7 +26,7 @@ export async function processRawInput(supabase, record) {
       throw new Error(`Failed to create signed URL: ${signedUrlError.message}`);
     }
 
-    text = await transcribeAudio(signedUrl, geminiApiKey);
+    text = await transcribeAudio(signedUrl, openaiApiKey);
   } else {
     if (!content_text) {
       throw new Error('Text record has no content_text');
@@ -33,8 +34,8 @@ export async function processRawInput(supabase, record) {
     text = content_text;
   }
 
-  // Step 2: Classify with Gemini
-  const classification = await classifyText(text, geminiApiKey);
+  // Step 2: Classify with NVIDIA LLM
+  const classification = await classifyText(text, nvidiaApiKey);
 
   // Step 3: Insert into items table
   const { error: insertError } = await supabase

@@ -1,34 +1,35 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 import pino from 'pino';
 import { CLASSIFIER_SYSTEM_PROMPT } from '../prompts/classifier.js';
 
 const logger = pino({ transport: { target: 'pino-pretty' } });
 
-export async function classifyText(text, geminiApiKey) {
-  const genAI = new GoogleGenerativeAI(geminiApiKey);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
-    generationConfig: {
-      temperature: 0.2,
-      responseMimeType: 'application/json',
-    },
+export async function classifyText(text, nvidiaApiKey) {
+  const client = new OpenAI({
+    baseURL: 'https://integrate.api.nvidia.com/v1',
+    apiKey: nvidiaApiKey,
   });
 
-  logger.info({ textLength: text.length }, 'Classifying text with Gemini');
+  logger.info({ textLength: text.length }, 'Classifying text with NVIDIA LLM');
 
-  const result = await model.generateContent({
-    systemInstruction: CLASSIFIER_SYSTEM_PROMPT,
-    contents: [{ role: 'user', parts: [{ text }] }],
+  const completion = await client.chat.completions.create({
+    model: 'meta/llama-3.3-70b-instruct',
+    messages: [
+      { role: 'system', content: CLASSIFIER_SYSTEM_PROMPT },
+      { role: 'user', content: text },
+    ],
+    temperature: 0.2,
+    response_format: { type: 'json_object' },
   });
 
-  const responseText = result.response.text();
-  logger.info({ responseText }, 'Gemini response received');
+  const responseText = completion.choices[0]?.message?.content || '';
+  logger.info({ responseText }, 'NVIDIA response received');
 
   // Parse the JSON response
   try {
     const parsed = JSON.parse(responseText);
     return parsed;
   } catch (parseErr) {
-    throw new Error(`Failed to parse Gemini response as JSON: ${responseText}`);
+    throw new Error(`Failed to parse NVIDIA response as JSON: ${responseText}`);
   }
 }

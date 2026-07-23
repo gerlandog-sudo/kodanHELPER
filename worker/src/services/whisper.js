@@ -1,18 +1,12 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import OpenAI from 'openai';
 import pino from 'pino';
 
 const logger = pino({ transport: { target: 'pino-pretty' } });
 
-export async function transcribeAudio(audioUrl, geminiApiKey) {
-  const genAI = new GoogleGenerativeAI(geminiApiKey);
-  const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
-    generationConfig: {
-      temperature: 0.1,
-    },
-  });
+export async function transcribeAudio(audioUrl, openaiApiKey) {
+  const openai = new OpenAI({ apiKey: openaiApiKey });
 
-  logger.info({ audioUrl }, 'Transcribing audio with Gemini');
+  logger.info({ audioUrl }, 'Transcribing audio with OpenAI Whisper');
 
   // Download audio from Supabase Storage signed URL
   const response = await fetch(audioUrl);
@@ -21,24 +15,15 @@ export async function transcribeAudio(audioUrl, geminiApiKey) {
   }
 
   const audioBuffer = await response.arrayBuffer();
-  const base64Audio = Buffer.from(audioBuffer).toString('base64');
 
-  // Detect mime type (default to webm)
-  const mimeType = response.headers.get('content-type') || 'audio/webm';
+  // Send to Whisper API
+  const transcription = await openai.audio.transcriptions.create({
+    file: new File([audioBuffer], 'audio.webm', { type: 'audio/webm' }),
+    model: 'whisper-1',
+    language: 'es',
+    response_format: 'text',
+  });
 
-  // Send to Gemini for transcription
-  const result = await model.generateContent([
-    {
-      inlineData: {
-        mimeType,
-        data: base64Audio,
-      },
-    },
-    { text: 'Transcribe este audio al español. Devuelve SOLO el texto transcrito, sin explicaciones ni prefijos.' },
-  ]);
-
-  const transcription = result.response.text();
-  logger.info({ transcriptionLength: transcription.length }, 'Gemini transcription complete');
-
+  logger.info({ transcriptionLength: transcription.length }, 'Transcription complete');
   return transcription;
 }
