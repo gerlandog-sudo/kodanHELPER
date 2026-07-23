@@ -10,10 +10,10 @@
     ></textarea>
 
     <!-- Category selector -->
-    <div class="flex gap-2">
+    <div class="flex gap-2 overflow-x-auto pb-2" style="-webkit-overflow-scrolling: touch;">
       <button v-for="cat in categories" :key="cat.value"
         @click="selectedCategory = cat.value"
-        class="flex-1 py-2 rounded-lg text-xs font-medium transition-all"
+        class="flex-shrink-0 px-4 py-2 rounded-lg text-xs font-medium transition-all whitespace-nowrap"
         :style="{
           backgroundColor: selectedCategory === cat.value ? cat.color + '20' : 'var(--surface-container-high)',
           color: selectedCategory === cat.value ? cat.color : 'var(--on-surface-variant)',
@@ -46,18 +46,15 @@
 import { ref } from 'vue';
 import { createItem, ingestText } from '../services/api.js';
 import { getSupabaseToken } from '../services/auth.js';
+import { CATEGORIES, DEFAULT_CATEGORY } from '../config/categories.js';
 
 const text = ref('');
 const sending = ref(false);
-const selectedCategory = ref('IDEA');
+const selectedCategory = ref(DEFAULT_CATEGORY);
 const status = ref('');
 const statusColor = ref('');
 
-const categories = [
-  { label: 'Idea', value: 'IDEA', color: 'var(--secondary)' },
-  { label: 'Tarea', value: 'TASK', color: 'var(--primary)' },
-  { label: 'Reunion', value: 'MEETING', color: 'var(--tertiary)' },
-];
+const categories = CATEGORIES;
 
 async function submit() {
   const content = text.value.trim();

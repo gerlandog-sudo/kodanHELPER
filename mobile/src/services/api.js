@@ -1,4 +1,5 @@
 import { supabase } from './auth.js';
+import { DEFAULT_CATEGORY } from '../config/categories.js';
 
 export async function fetchItems() {
   const { data, error } = await supabase
@@ -24,12 +25,11 @@ export async function fetchItemsByCategory(category) {
 export async function createItem({ title, category, metadata }) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError;
-
   const { data, error } = await supabase
     .from('items')
     .insert({
       title,
-      category: category || 'UNCATEGORIZED',
+      category: category || DEFAULT_CATEGORY,
       user_id: user?.id,
       metadata: metadata || {},
       status: 'inbox',

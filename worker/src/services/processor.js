@@ -26,7 +26,7 @@ export async function processRawInput(supabase, record) {
     .insert({
       raw_input_id: id,
       user_id,
-      category: classification.category || 'UNCATEGORIZED',
+      category: classification.category || 'Nota',
       title: classification.title || 'Untitled',
       summary: classification.summary || text.substring(0, 500),
       metadata: classification.metadata || {},

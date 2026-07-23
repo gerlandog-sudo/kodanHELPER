@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { fetchItems } from '../services/api.js';
 import { subscribeToItems } from '../services/realtime.js';
+import { CATEGORIES } from '../config/categories.js';
 
 export const useItemsStore = defineStore('items', () => {
   const items = ref([]);
@@ -14,11 +15,18 @@ export const useItemsStore = defineStore('items', () => {
     return items.value.filter(i => i.category === filter.value);
   });
 
-  // Computed by category
-  const tasks = computed(() => items.value.filter(i => i.category === 'TASK'));
-  const ideas = computed(() => items.value.filter(i => i.category === 'IDEA'));
-  const meetings = computed(() => items.value.filter(i => i.category === 'MEETING'));
-  const uncategorized = computed(() => items.value.filter(i => i.category === 'UNCATEGORIZED'));
+  // Computed por categoría — generado automáticamente desde CATEGORIES
+  const byCategory = {};
+  for (const cat of CATEGORIES) {
+    const key = cat.value[0].toLowerCase() + cat.value.slice(1);
+    byCategory[key] = computed(() => items.value.filter(i => i.category === cat.value));
+  }
+
+  // Alias semánticos
+  const tasks = byCategory.tarea;
+  const ideas = byCategory.idea;
+  const meetings = byCategory.reunion;
+  const notes = byCategory.nota;
 
   // Counts
   const totalCount = computed(() => items.value.length);
@@ -64,7 +72,8 @@ export const useItemsStore = defineStore('items', () => {
 
   return {
     items, loading, error, filter, filteredItems,
-    tasks, ideas, meetings, uncategorized,
+    ...byCategory,
+    tasks, ideas, meetings, notes,
     totalCount, inboxCount,
     loadItems, startRealtime, stopRealtime, setFilter,
   };

@@ -114,7 +114,7 @@ async function sendPhoto() {
     // Create item with photo reference
     await createItem({
       title: 'Foto capturada',
-      category: 'UNCATEGORIZED',
+      category: 'Nota',
       metadata: { photo: publicUrl, fileName },
     });
 

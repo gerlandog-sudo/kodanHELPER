@@ -36,7 +36,7 @@ export async function classifyText(text, nvidiaApiKey) {
   try {
     const parsed = JSON.parse(responseText);
     return {
-      category: parsed.category || 'UNCATEGORIZED',
+      category: parsed.category || 'Nota',
       title: parsed.title || 'Untitled',
       summary: parsed.summary || text.substring(0, 500),
       metadata: parsed.metadata || {},
@@ -44,7 +44,7 @@ export async function classifyText(text, nvidiaApiKey) {
   } catch (parseErr) {
     logger.error({ responseText, parseErr: parseErr.message }, 'Failed to parse NVIDIA response as JSON');
     return {
-      category: 'UNCATEGORIZED',
+      category: 'Nota',
       title: text.substring(0, 80),
       summary: text.substring(0, 500),
       metadata: {},

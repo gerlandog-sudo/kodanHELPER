@@ -44,14 +44,13 @@
 import { onMounted, onUnmounted } from 'vue';
 import { useItemsStore } from '../stores/items.js';
 import ItemCard from '../components/ItemCard.vue';
+import { CATEGORIES } from '../config/categories.js';
 
 const store = useItemsStore();
 
 const filters = [
   { label: 'Todo', value: 'ALL' },
-  { label: 'Tareas', value: 'TASK' },
-  { label: 'Ideas', value: 'IDEA' },
-  { label: 'Reuniones', value: 'MEETING' },
+  ...CATEGORIES.map(c => ({ label: c.label, value: c.value })),
 ];
 
 onMounted(async () => {

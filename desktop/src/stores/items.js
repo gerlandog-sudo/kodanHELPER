@@ -2,17 +2,28 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { fetchItems } from '../services/api.js';
 import { subscribeToItems } from '../services/realtime.js';
+import { CATEGORIES } from '../config/categories.js';
 
 export const useItemsStore = defineStore('items', () => {
   const items = ref([]);
   const loading = ref(false);
   const error = ref(null);
 
-  // Computed by category
-  const tasks = computed(() => items.value.filter(i => i.category === 'TASK'));
-  const ideas = computed(() => items.value.filter(i => i.category === 'IDEA'));
-  const meetings = computed(() => items.value.filter(i => i.category === 'MEETING'));
-  const uncategorized = computed(() => items.value.filter(i => i.category === 'UNCATEGORIZED'));
+  // Computed por categoría — se genera automáticamente desde CATEGORIES
+  const byCategory = {};
+  for (const cat of CATEGORIES) {
+    const key = cat.value[0].toLowerCase() + cat.value.slice(1);
+    byCategory[key] = computed(() => items.value.filter(i => i.category === cat.value));
+  }
+
+  // Alias con nombres semánticos para componentes existentes
+  const tasks = byCategory.tarea;
+  const ideas = byCategory.idea;
+  const meetings = byCategory.reunion;
+  const reminders = byCategory.recordatorio;
+  const notes = byCategory.nota;
+  const toResearch = byCategory.investigar;
+  const toCall = byCategory.llamar;
 
   // Counts
   const totalCount = computed(() => items.value.length);
@@ -53,7 +64,8 @@ export const useItemsStore = defineStore('items', () => {
 
   return {
     items, loading, error,
-    tasks, ideas, meetings, uncategorized,
+    ...byCategory,
+    tasks, ideas, meetings, reminders, notes, toResearch, toCall,
     totalCount, inboxCount,
     loadItems, startRealtime, stopRealtime,
   };

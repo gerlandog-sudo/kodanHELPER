@@ -1,5 +1,5 @@
 <template>
-  <div class="glass-card hover-lift cursor-pointer">
+  <div class="glass-card p-4 hover-lift cursor-pointer">
     <div class="flex items-start justify-between mb-2">
       <span class="text-xs font-medium px-2 py-0.5 rounded"
         :style="{ backgroundColor: categoryColor + '20', color: categoryColor }">
@@ -23,17 +23,13 @@
 
 <script setup>
 import { format, parseISO } from 'date-fns';
+import { getCategoryColor } from '../config/categories.js';
 
 const props = defineProps({
   item: { type: Object, required: true },
 });
 
-const categoryColor = {
-  TASK: 'var(--primary)',
-  IDEA: 'var(--secondary)',
-  MEETING: 'var(--tertiary)',
-  UNCATEGORIZED: 'var(--on-surface-variant)',
-}[props.item.category] || 'var(--on-surface-variant)';
+const categoryColor = getCategoryColor(props.item.category);
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
