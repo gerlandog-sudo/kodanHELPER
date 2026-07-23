@@ -6,7 +6,6 @@ const logger = pino({ transport: { target: 'pino-pretty' } });
 
 export async function processRawInput(supabase, record) {
   const { id, type, content_url, content_text, user_id } = record;
-  const openaiApiKey = process.env.OPENAI_API_KEY;
   const geminiApiKey = process.env.GEMINI_API_KEY;
 
   // Step 1: Get plain text
@@ -26,7 +25,7 @@ export async function processRawInput(supabase, record) {
       throw new Error(`Failed to create signed URL: ${signedUrlError.message}`);
     }
 
-    text = await transcribeAudio(signedUrl, openaiApiKey);
+    text = await transcribeAudio(signedUrl, geminiApiKey);
   } else {
     if (!content_text) {
       throw new Error('Text record has no content_text');
