@@ -52,12 +52,37 @@
       <transition name="toast">
         <p v-if="message" class="mt-4 text-sm text-center" :style="{ color: messageColor }">{{ message }}</p>
       </transition>
+
+      <!-- PWA Install banner (Android) -->
+      <div v-if="installEvent" @click="installPWA"
+        class="mt-6 p-3 rounded-xl flex items-center justify-between cursor-pointer transition-all active:scale-[0.97]"
+        style="background-color: var(--surface-container); border: 1px solid var(--outline-variant);">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+            style="background: linear-gradient(135deg, #6b38d4, #a855f7);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polyline points="6 17 12 23 18 17"/><polyline points="6 5 12 11 18 5"/></svg>
+          </div>
+          <div>
+            <p class="text-sm font-medium" style="color: var(--on-surface);">Instalar kHELPER</p>
+            <p class="text-xs" style="color: var(--on-surface-variant);">Acceso rápido desde tu pantalla de inicio</p>
+          </div>
+        </div>
+        <span class="text-lg" style="color: var(--primary);">+</span>
+      </div>
+
+      <!-- iOS install hint -->
+      <p v-if="isIOS"
+        class="mt-5 text-xs text-center leading-relaxed" style="color: var(--on-surface-variant);">
+        En iOS: toca <span style="font-weight: 600;">Compartir</span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: inline; vertical-align: middle;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+        y selecciona <span style="font-weight: 600;">Agregar a pantalla de inicio</span>
+      </p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { signInWithGoogle, signInWithPassword, signUpWithEmail } from '../services/auth.js';
 import { useRouter } from 'vue-router';
 
@@ -67,6 +92,33 @@ const loginPasswordField = ref('');
 const loading = ref(false);
 const message = ref('');
 const messageColor = ref('var(--primary)');
+const installEvent = ref(null);
+const isIOS = ref(false);
+
+onMounted(() => {
+  // Detect iOS
+  isIOS.value = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  // Listen for the PWA install prompt (Android Chrome)
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    installEvent.value = e;
+  });
+
+  // Track if app was already installed
+  window.addEventListener('appinstalled', () => {
+    installEvent.value = null;
+  });
+});
+
+async function installPWA() {
+  if (!installEvent.value) return;
+  installEvent.value.prompt();
+  const result = await installEvent.value.userChoice;
+  if (result.outcome === 'accepted') {
+    installEvent.value = null;
+  }
+}
 
 async function loginPassword() {
   loading.value = true;
