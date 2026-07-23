@@ -6,6 +6,7 @@ ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
+COPY public/ public/
 COPY . .
 RUN npm run build
 
