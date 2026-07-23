@@ -63,36 +63,19 @@ export async function ingestText(text, token) {
 }
 
 /**
- * Ingest audio: upload to Supabase Storage + insert raw_input for processing
+ * Ingest transcribed text from SpeechRecognition: insert raw_input for AI classification
  */
-export async function ingestAudio(audioBlob) {
-  // 0. Get authenticated user first (need ID for storage path + insert)
+export async function ingestTranscribedText(text) {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError;
   if (!user) throw new Error('No autenticado');
 
-  // 1. Upload to Supabase Storage
-  // RLS on audio-uploads requires path: {userId}/{filename}
-  const ext = audioBlob.type?.includes('webm') ? 'webm' : 'webm';
-  const fileName = `${user.id}/audio-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { data: uploadData, error: uploadError } = await supabase.storage
-    .from('audio-uploads')
-    .upload(fileName, audioBlob, {
-      contentType: audioBlob.type || 'audio/webm',
-      upsert: false,
-    });
-
-  if (uploadError) {
-    throw new Error(`Error al subir audio: ${uploadError.message}`);
-  }
-
-  // 2. Insert into raw_inputs (worker picks it up for transcription + AI)
   const { data, error: insertError } = await supabase
     .from('raw_inputs')
     .insert({
       user_id: user.id,
-      type: 'audio',
-      content_url: uploadData.path,
+      type: 'text',
+      content_text: text,
       status: 'pending',
     })
     .select()

@@ -35,7 +35,7 @@ import { ref, reactive } from 'vue';
 import AudioRecorder from '../components/AudioRecorder.vue';
 import QuickTextInput from '../components/QuickTextInput.vue';
 import PhotoCapture from '../components/PhotoCapture.vue';
-import { ingestAudio } from '../services/api.js';
+import { ingestTranscribedText } from '../services/api.js';
 import { supabase } from '../services/auth.js';
 
 const activeTab = ref('audio');
@@ -63,7 +63,7 @@ async function pollStatus(rawInputId) {
 
   const poll = async () => {
     if (attempts >= maxAttempts) {
-      showToast('El procesamiento está tomando más de lo esperado. Revisa tu lista más tarde.', 'success');
+      showToast('Tardando más de lo esperado. Revisa tu lista más tarde.', 'success');
       return;
     }
     attempts++;
@@ -80,7 +80,7 @@ async function pollStatus(rawInputId) {
     }
 
     if (data.status === 'processed') {
-      showToast('Audio procesado correctamente', 'success');
+      showToast('Nota creada correctamente', 'success');
       return;
     }
 
@@ -97,11 +97,12 @@ async function pollStatus(rawInputId) {
   pollTimer = setTimeout(poll, 5000);
 }
 
-async function handleAudio(audioBlob) {
-  showToast('Subiendo audio...', 'success');
+async function handleAudio(transcribedText) {
+  if (!transcribedText || !transcribedText.trim()) return;
+  showToast('Procesando dictado...', 'success');
   try {
-    const rawInput = await ingestAudio(audioBlob);
-    showToast(`Audio capturado (${(audioBlob.size / 1024).toFixed(0)} KB)`, 'success');
+    const rawInput = await ingestTranscribedText(transcribedText);
+    showToast('Texto enviado para clasificar', 'success');
     // Poll for processing status
     pollStatus(rawInput.id);
   } catch (err) {

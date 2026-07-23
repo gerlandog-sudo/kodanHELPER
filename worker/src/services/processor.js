@@ -1,14 +1,16 @@
 import pino from 'pino';
-import { transcribeAudio, classifyText } from './groq.js';
+import { transcribeAudio } from './groq.js';
+import { classifyText } from './nvidia.js';
 
 const logger = pino({ transport: { target: 'pino-pretty' } });
 
 export async function processRawInput(supabase, record) {
   const { id, type, content_url, content_text, user_id } = record;
   const groqApiKey = process.env.GROQ_API_KEY;
+  const nvidiaApiKey = process.env.NVIDIA_API_KEY || process.env.GEMINI_API_KEY;
 
-  if (!groqApiKey) {
-    throw new Error('GROQ_API_KEY environment variable is not set');
+  if (!nvidiaApiKey) {
+    throw new Error('NVIDIA_API_KEY environment variable is not set');
   }
 
   // Step 1: Get plain text
@@ -36,8 +38,8 @@ export async function processRawInput(supabase, record) {
     text = content_text;
   }
 
-  // Step 2: Classify with Groq LLM
-  const classification = await classifyText(text, groqApiKey);
+  // Step 2: Classify with NVIDIA Gemma
+  const classification = await classifyText(text, nvidiaApiKey);
 
   // Step 3: Insert into items table
   const { error: insertError } = await supabase
