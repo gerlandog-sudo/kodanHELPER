@@ -21,13 +21,16 @@ export async function fetchItemsByCategory(category) {
   return data;
 }
 
-export async function createItem({ title, category, source, metadata }) {
+export async function createItem({ title, category, metadata }) {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError) throw userError;
+
   const { data, error } = await supabase
     .from('items')
     .insert({
       title,
       category: category || 'UNCATEGORIZED',
-      source: source || 'mobile',
+      user_id: user?.id,
       metadata: metadata || {},
       status: 'inbox',
     })

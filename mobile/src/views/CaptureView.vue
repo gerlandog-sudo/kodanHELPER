@@ -35,6 +35,8 @@ import { ref, reactive } from 'vue';
 import AudioRecorder from '../components/AudioRecorder.vue';
 import QuickTextInput from '../components/QuickTextInput.vue';
 import PhotoCapture from '../components/PhotoCapture.vue';
+import { ingestAudio } from '../services/api.js';
+import { getSupabaseToken } from '../services/auth.js';
 
 const activeTab = ref('audio');
 
@@ -53,7 +55,15 @@ function showToast(msg, type = 'success') {
   setTimeout(() => { toast.visible = false; }, 3000);
 }
 
-function handleAudio(audioBlob) {
-  showToast(`Audio capturado (${(audioBlob.size / 1024).toFixed(0)} KB)`);
+async function handleAudio(audioBlob) {
+  showToast('Subiendo audio...', 'success');
+  try {
+    const token = await getSupabaseToken();
+    if (!token) throw new Error('No autenticado');
+    await ingestAudio(audioBlob, token);
+    showToast(`Audio capturado (${(audioBlob.size / 1024).toFixed(0)} KB)`, 'success');
+  } catch (err) {
+    showToast(`Error: ${err.message}`, 'error');
+  }
 }
 </script>
