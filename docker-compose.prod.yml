@@ -39,7 +39,6 @@ services:
       - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - GROQ_API_KEY=${GROQ_API_KEY}
       - NVIDIA_API_KEY=${NVIDIA_API_KEY}
     networks:
       - kodan_net

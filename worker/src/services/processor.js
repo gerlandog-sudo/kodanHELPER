@@ -1,42 +1,21 @@
 import pino from 'pino';
-import { transcribeAudio } from './groq.js';
 import { classifyText } from './nvidia.js';
 
 const logger = pino({ transport: { target: 'pino-pretty' } });
 
 export async function processRawInput(supabase, record) {
-  const { id, type, content_url, content_text, user_id } = record;
-  const groqApiKey = process.env.GROQ_API_KEY;
+  const { id, content_text, user_id } = record;
   const nvidiaApiKey = process.env.NVIDIA_API_KEY || process.env.GEMINI_API_KEY;
 
   if (!nvidiaApiKey) {
     throw new Error('NVIDIA_API_KEY environment variable is not set');
   }
 
-  // Step 1: Get plain text
-  let text;
-  if (type === 'audio') {
-    if (!content_url) {
-      throw new Error('Audio record has no content_url');
-    }
-
-    // Generate a signed URL for the audio file
-    const { data: { signedUrl }, error: signedUrlError } = await supabase
-      .storage
-      .from('audio-uploads')
-      .createSignedUrl(content_url, 300); // 5 minute expiry
-
-    if (signedUrlError) {
-      throw new Error(`Failed to create signed URL: ${signedUrlError.message}`);
-    }
-
-    text = await transcribeAudio(signedUrl, groqApiKey);
-  } else {
-    if (!content_text) {
-      throw new Error('Text record has no content_text');
-    }
-    text = content_text;
+  // Get plain text — only text inputs supported (SpeechRecognition client-side)
+  if (!content_text) {
+    throw new Error('Text record has no content_text. Audio uploads no longer supported — use browser SpeechRecognition.');
   }
+  const text = content_text;
 
   // Step 2: Classify with NVIDIA Gemma
   const classification = await classifyText(text, nvidiaApiKey);

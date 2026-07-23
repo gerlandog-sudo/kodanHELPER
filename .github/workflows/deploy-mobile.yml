@@ -63,7 +63,6 @@ jobs:
             grep -q "SUPABASE_SERVICE_KEY" .env 2>/dev/null || echo "SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }}" >> .env
             grep -q "OPENAI_API_KEY" .env 2>/dev/null || echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
             grep -q "GEMINI_API_KEY" .env 2>/dev/null || echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
-            grep -q "GROQ_API_KEY" .env 2>/dev/null || echo "GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}" >> .env
             grep -q "CORS_ORIGIN" .env 2>/dev/null || echo "CORS_ORIGIN=https://helper.kodan.software" >> .env
             grep -q "CORS_ORIGIN_MOBILE" .env 2>/dev/null || echo "CORS_ORIGIN_MOBILE=https://mhelper.kodan.software" >> .env
 
