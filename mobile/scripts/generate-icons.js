@@ -13,9 +13,9 @@ const svgPath = resolve(iconsDir, 'icon.svg');
 mkdirSync(iconsDir, { recursive: true });
 
 const sizes = [
-  { name: 'icon-192.png', size: 192 },
-  { name: 'icon-512.png', size: 512 },
-  { name: 'apple-touch-icon.png', size: 180 },
+  { name: 'icon-192-v2.png', size: 192 },
+  { name: 'icon-512-v2.png', size: 512 },
+  { name: 'apple-touch-icon-v2.png', size: 180 },
 ];
 
 const svg = readFileSync(svgPath);
