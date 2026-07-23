@@ -65,3 +65,5 @@ export async function classifyText(text, groqApiKey) {
     throw new Error(`Failed to parse Groq response as JSON: ${responseText}`);
   }
 }
+
+// groq
