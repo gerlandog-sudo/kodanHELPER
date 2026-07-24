@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { fetchItems } from '../services/api.js';
 import { subscribeToItems } from '../services/realtime.js';
 import { CATEGORIES } from '../config/categories.js';
+import { supabase } from '../services/auth.js';
 
 export const useItemsStore = defineStore('items', () => {
   const items = ref([]);
@@ -27,6 +28,7 @@ export const useItemsStore = defineStore('items', () => {
   const ideas = byCategory.idea;
   const meetings = byCategory.reunion;
   const notes = byCategory.nota;
+  const emails = byCategory.email;
 
   // Counts
   const totalCount = computed(() => items.value.length);
@@ -43,6 +45,29 @@ export const useItemsStore = defineStore('items', () => {
     } finally {
       loading.value = false;
     }
+  }
+
+  async function updateItem(itemId, data) {
+    const { error } = await supabase
+      .from('items')
+      .update(data)
+      .eq('id', itemId);
+
+    if (error) throw error;
+
+    // Actualizar en store local
+    const idx = items.value.findIndex(i => i.id === itemId);
+    if (idx !== -1) {
+      items.value[idx] = { ...items.value[idx], ...data };
+    }
+  }
+
+  async function completeItem(itemId) {
+    await updateItem(itemId, { status: 'completed' });
+  }
+
+  async function cancelItem(itemId) {
+    await updateItem(itemId, { status: 'cancelled' });
   }
 
   function startRealtime() {
@@ -73,8 +98,9 @@ export const useItemsStore = defineStore('items', () => {
   return {
     items, loading, error, filter, filteredItems,
     ...byCategory,
-    tasks, ideas, meetings, notes,
+    tasks, ideas, meetings, notes, emails,
     totalCount, inboxCount,
-    loadItems, startRealtime, stopRealtime, setFilter,
+    loadItems, updateItem, completeItem, cancelItem,
+    startRealtime, stopRealtime, setFilter,
   };
 });

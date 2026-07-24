@@ -87,3 +87,10 @@ export async function ingestTranscribedText(text) {
 
   return data;
 }
+
+/**
+ * Ingest text for AI classification (without manual category)
+ */
+export async function ingestTextForAI(text) {
+  return ingestTranscribedText(text);
+}

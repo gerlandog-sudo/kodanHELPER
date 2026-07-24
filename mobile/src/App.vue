@@ -30,6 +30,9 @@
         <span class="nav-label">Ajustes</span>
       </router-link>
     </nav>
+
+    <!-- Toast notifications -->
+    <AppToast />
   </div>
 </template>
 
@@ -38,6 +41,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { supabase, onAuthChange } from './services/auth.js';
 import { useThemeStore } from './stores/theme.js';
+import AppToast from './components/AppToast.vue';
 
 const router = useRouter();
 const isLoggedIn = ref(false);

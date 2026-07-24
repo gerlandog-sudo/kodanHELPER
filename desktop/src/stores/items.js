@@ -1,12 +1,14 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { fetchItems } from '../services/api.js';
-import { subscribeToItems } from '../services/realtime.js';
+import { fetchItems, fetchRawInputs, updateItem } from '../services/api.js';
+import { subscribeToItems, subscribeToRawInputs } from '../services/realtime.js';
 import { CATEGORIES } from '../config/categories.js';
 
 export const useItemsStore = defineStore('items', () => {
   const items = ref([]);
+  const rawInputs = ref([]);
   const loading = ref(false);
+  const loadingRaw = ref(false);
   const error = ref(null);
 
   // Computed por categoría — se genera automáticamente desde CATEGORIES
@@ -24,12 +26,14 @@ export const useItemsStore = defineStore('items', () => {
   const notes = byCategory.nota;
   const toResearch = byCategory.investigar;
   const toCall = byCategory.llamar;
+  const emails = byCategory.email;
 
   // Counts
   const totalCount = computed(() => items.value.length);
   const inboxCount = computed(() => items.value.filter(i => i.status === 'inbox').length);
 
-  let unsubscribe = null;
+  let unsubscribeItems = null;
+  let unsubscribeRawInputs = null;
 
   async function loadItems() {
     loading.value = true;
@@ -42,31 +46,92 @@ export const useItemsStore = defineStore('items', () => {
     }
   }
 
-  function startRealtime() {
-    unsubscribe = subscribeToItems((event, item) => {
-      if (event === 'insert') {
-        items.value.unshift(item);
-      } else if (event === 'update') {
-        const idx = items.value.findIndex(i => i.id === item.id);
-        if (idx !== -1) {
-          items.value[idx] = item;
-        }
-      }
+  async function loadRawInputs() {
+    loadingRaw.value = true;
+    try {
+      rawInputs.value = await fetchRawInputs();
+    } catch (err) {
+      console.error('Error loading raw inputs:', err);
+    } finally {
+      loadingRaw.value = false;
+    }
+  }
+
+  async function moveItem(itemId, newCategory, metadata) {
+    const idx = items.value.findIndex(i => i.id === itemId);
+    if (idx === -1) throw new Error('Item no encontrado');
+
+    // Actualizar en DB
+    await updateItem(itemId, {
+      category: newCategory,
+      metadata: metadata || items.value[idx].metadata,
+      status: 'active',
     });
+
+    // Actualizar en store local
+    items.value[idx] = {
+      ...items.value[idx],
+      category: newCategory,
+      metadata: metadata || items.value[idx].metadata,
+      status: 'active',
+    };
+  }
+
+  function startRealtime() {
+    if (!unsubscribeItems) {
+      unsubscribeItems = subscribeToItems((event, item) => {
+        if (event === 'insert') {
+          items.value.unshift(item);
+          // Remover de rawInputs si estaba ahí
+          if (item.raw_input_id) {
+            rawInputs.value = rawInputs.value.filter(r => r.id !== item.raw_input_id);
+          }
+        } else if (event === 'update') {
+          const idx = items.value.findIndex(i => i.id === item.id);
+          if (idx !== -1) {
+            items.value[idx] = item;
+          }
+        }
+      });
+    }
+
+    if (!unsubscribeRawInputs) {
+      unsubscribeRawInputs = subscribeToRawInputs((event, rawInput) => {
+        if (event === 'insert') {
+          rawInputs.value.unshift(rawInput);
+        } else if (event === 'update') {
+          const idx = rawInputs.value.findIndex(r => r.id === rawInput.id);
+          if (idx !== -1) {
+            rawInputs.value[idx] = rawInput;
+          }
+          // Si fue procesado o falló, remover después de un tiempo
+          if (rawInput.status === 'processed' || rawInput.status === 'failed') {
+            setTimeout(() => {
+              rawInputs.value = rawInputs.value.filter(r => r.id !== rawInput.id);
+            }, 3000);
+          }
+        }
+      });
+    }
   }
 
   function stopRealtime() {
-    if (unsubscribe) {
-      unsubscribe();
-      unsubscribe = null;
+    if (unsubscribeItems) {
+      unsubscribeItems();
+      unsubscribeItems = null;
+    }
+    if (unsubscribeRawInputs) {
+      unsubscribeRawInputs();
+      unsubscribeRawInputs = null;
     }
   }
 
   return {
-    items, loading, error,
+    items, rawInputs, loading, loadingRaw, error,
     ...byCategory,
-    tasks, ideas, meetings, reminders, notes, toResearch, toCall,
+    tasks, ideas, meetings, reminders, notes, toResearch, toCall, emails,
     totalCount, inboxCount,
-    loadItems, startRealtime, stopRealtime,
+    loadItems, loadRawInputs, moveItem,
+    startRealtime, stopRealtime,
   };
 });

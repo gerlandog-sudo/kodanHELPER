@@ -25,3 +25,26 @@ export async function fetchItemsByCategory(category) {
   if (error) throw error;
   return data;
 }
+
+export async function updateItem(itemId, updates) {
+  const { data, error } = await supabase
+    .from('items')
+    .update(updates)
+    .eq('id', itemId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function fetchRawInputs() {
+  const { data, error } = await supabase
+    .from('raw_inputs')
+    .select('*')
+    .in('status', ['pending', 'processing'])
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+}

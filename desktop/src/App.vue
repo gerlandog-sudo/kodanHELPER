@@ -58,6 +58,9 @@
         </transition>
       </router-view>
     </main>
+
+    <!-- Toast notifications -->
+    <AppToast />
   </div>
 </template>
 
@@ -65,6 +68,7 @@
 import { ref, watch, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { supabase, onAuthChange } from './services/auth.js';
+import AppToast from './components/AppToast.vue';
 
 const route = useRoute();
 const router = useRouter();

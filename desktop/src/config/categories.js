@@ -11,6 +11,7 @@ export const CATEGORIES = [
   { value: 'Nota',        label: 'Nota',        color: 'var(--on-surface-variant)' },
   { value: 'Investigar',  label: 'Investigar',  color: '#9b59b6' },
   { value: 'Llamar',      label: 'Llamar',      color: '#e67e22' },
+  { value: 'Email',       label: 'Email',       color: '#3498db' },
 ];
 
 /** Categoría por defecto cuando la IA no puede clasificar */
